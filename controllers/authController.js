@@ -45,8 +45,8 @@
                         await transporter.sendMail(mailOptions);
                         res.status(200).send({
                             message:"User registered successfully",
-                            user,
-                            refreshToken:generateRefreshToken(user,res)
+                            // user,
+                            // refreshToken:generateRefreshToken(user,res)
                         });
                     }
                 });
@@ -83,8 +83,8 @@
                     }
                     res.status(200).send({
                         message:"User logged in successfully",
-                        user,
-                        refreshToken:generateRefreshToken(user,res)
+                        // user,
+                        // refreshToken:generateRefreshToken(user,res)
                     });
                 });
             } catch (error) {
@@ -102,7 +102,23 @@
                     res.status(200).send({ message: "User logged out successfully" });
                 }
             
-
+        static async getMe(req, res) {
+            try {
+                let email = req.user;
+                conn.query('SELECT * FROM user WHERE email = ?', [email], (err, result) => {
+                    if (err) {
+                        res.status(400).send({ error: err.message });
+                    } else {
+                        let user = result[0];
+                        // To hide the Password
+                        delete user.password;
+                        res.status(200).send({ user });
+                    }
+                });
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
+        }
         static async sendVerifyOtp(req, res) {
             try {
                 let email  = req.user;
@@ -113,7 +129,7 @@
                         res.status(400).send({ error: err.message });
                         return;
                     }
-                    console.log("Query result:", result); // Debugging line
+                    
         
                     if (!result.length) {
                         res.status(400).send({ error: "User does not exist" });
@@ -129,7 +145,7 @@
                     let otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
                     .toISOString()
                     .slice(0,19)
-                    .replace("T"," "); // 5 minutes
+                    .replace("T"," "); 
                     conn.query('UPDATE user SET verifyOtp = ? WHERE email = ?', [otp, email]);
                     conn.query('UPDATE user SET verifyOtpExpiredAt = ? WHERE email = ?', [otpExpiry, email]);
                     let mailOptions = {
