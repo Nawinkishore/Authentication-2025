@@ -126,7 +126,12 @@
                     }
         
                     let otp = Math.floor(100000 + Math.random() * 900000);
+                    let otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+                    .toISOString()
+                    .slice(0,19)
+                    .replace("T"," "); // 5 minutes
                     conn.query('UPDATE user SET verifyOtp = ? WHERE email = ?', [otp, email]);
+                    conn.query('UPDATE user SET verifyOtpExpiredAt = ? WHERE email = ?', [otpExpiry, email]);
                     let mailOptions = {
                         from: process.env.SENDER_EMAIL,
                         to: email,
@@ -163,23 +168,23 @@
                         res.status(400).send({ error: "User is already verified" });
                         return;
                     }
-        
-                    let storedOtp = result[0].verifyOtp?.toString(); // Ensure OTP is a string
-                    let receivedOtp = otp.toString(); // Convert received OTP to string
+                
+                    let storedOtp = result[0].verifyOtp?.toString();
+                    let receivedOtp = otp.toString(); 
         
                     if (storedOtp !== receivedOtp) {
                         res.status(400).send({ error: "Invalid OTP" });
                         return;
                     }
         
-                    // Optional: Check OTP expiry
+                  
                     if (Date.now() > result[0].veriftyOtpExpiredAt) {
                         res.status(400).send({ error: "OTP expired" });
                         return;
                     }
         
-                    // Mark user as verified
-                    conn.query('UPDATE user SET isVerified = ?, verifyOtp = NULL WHERE email = ?', [true, email], (err, updateResult) => {
+                    
+                    conn.query('UPDATE user SET isVerified = ?, verifyOtp = NULL,verifyOtpExpiredAt = NULL WHERE email = ?', [true, email], (err, updateResult) => {
                         if (err) {
                             res.status(400).send({ error: err.message });
                         } else {
@@ -192,7 +197,6 @@
                 res.status(500).send({ error: error.message });
             }
         }
-        
         static async changePassword(req,res){
             try {
                 let {email,password,newPassword} = req.body;
