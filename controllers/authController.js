@@ -12,6 +12,13 @@
                 res.status(400).send({error:"All fields are required"});
                 return;
             }
+            // Password Regex
+            let password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
+            if(!password_regex.test(password)){
+                res.status(400).send({error:"Password must contain at least one uppercase letter, one lowercase letter, one number and at least 6 characters"});
+                return;
+            }
+
             if(!email_regex.test(email)){
                 res.status(400).send({error:"Invalid email address"});
                 return;
