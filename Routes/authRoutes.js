@@ -6,6 +6,6 @@ router.post('/login',authController.login);
 router.post('/register',authController.register);
 router.get('/logout',authController.logout);
 router.get('/me',protectRoute('admin'),authController.getMe);
-router.post('/sendverifyotp',protectRoute('admin'),authController.sendVerifyOtp);
-router.post('/verifyotp',protectRoute('admin'),authController.verifyOtp);
+// router.post('/sendverifyotp',protectRoute('admin'),authController.sendVerifyOtp);
+// router.post('/verifyotp',protectRoute('admin'),authController.verifyOtp);
 export default router;

@@ -38,16 +38,19 @@
                 let user = {
                     name,email,role
                 }
+                
                 conn.query('INSERT INTO user SET ?',newObj,async(err,result)=>{
                     if(err){
                         res.status(400).send({error:err.message});
                     }
                     else{
+                        let loginPage = `${process.env.BASE_URL}/api/auth/login`
                         let mailOptions = {
                             from : process.env.SENDER_EMAIL,
                             to:email,
                             subject:"Welcome to our platform",
-                            text:`Hello ${name}, welcome to our platform.`
+                            text:`Hello ${name}, welcome to our platform.`,
+                            html:`<Button><a href="${loginPage}">Login<a/></Button>`
                         }
                         await transporter.sendMail(mailOptions);
                         res.status(200).send({
@@ -133,100 +136,100 @@
                     // Forgot Password Logic Here
             });
         }
-        static async sendVerifyOtp(req, res) {
-            try {
-                let email  = req.user;
+        // static async sendVerifyOtp(req, res) {
+        //     try {
+        //         let email  = req.user;
         
-                conn.query('SELECT * FROM user WHERE email = ?', [email], async (err, result) => {
-                    if (err) {
-                        console.error("SQL Error:", err.message);
-                        res.status(400).send({ error: err.message });
-                        return;
-                    }
+        //         conn.query('SELECT * FROM user WHERE email = ?', [email], async (err, result) => {
+        //             if (err) {
+        //                 console.error("SQL Error:", err.message);
+        //                 res.status(400).send({ error: err.message });
+        //                 return;
+        //             }
                     
         
-                    if (!result.length) {
-                        res.status(400).send({ error: "User does not exist" });
-                        return;
-                    }
+        //             if (!result.length) {
+        //                 res.status(400).send({ error: "User does not exist" });
+        //                 return;
+        //             }
         
-                    if (result[0].isVerified) {
-                        res.status(400).send({ error: "User is already verified" });
-                        return;
-                    }
+        //             if (result[0].isVerified) {
+        //                 res.status(400).send({ error: "User is already verified" });
+        //                 return;
+        //             }
         
-                    let otp = Math.floor(100000 + Math.random() * 900000);
-                    let otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
-                    .toISOString()
-                    .slice(0,19)
-                    .replace("T"," "); 
-                    conn.query('UPDATE user SET verifyOtp = ? WHERE email = ?', [otp, email]);
-                    conn.query('UPDATE user SET verifyOtpExpiredAt = ? WHERE email = ?', [otpExpiry, email]);
-                    let mailOptions = {
-                        from: process.env.SENDER_EMAIL,
-                        to: email,
-                        subject: "OTP for verification",
-                        text: `Your OTP is ${otp}`
-                    };
+        //             let otp = Math.floor(100000 + Math.random() * 900000);
+        //             let otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+        //             .toISOString()
+        //             .slice(0,19)
+        //             .replace("T"," "); 
+        //             conn.query('UPDATE user SET verifyOtp = ? WHERE email = ?', [otp, email]);
+        //             conn.query('UPDATE user SET verifyOtpExpiredAt = ? WHERE email = ?', [otpExpiry, email]);
+        //             let mailOptions = {
+        //                 from: process.env.SENDER_EMAIL,
+        //                 to: email,
+        //                 subject: "OTP for verification",
+        //                 text: `Your OTP is ${otp}`
+        //             };
         
-                    await transporter.sendMail(mailOptions);
-                    res.status(200).send({ message: "OTP sent successfully", otp });
-                });
-            } catch (error) {
-                console.error("Error in sendVerifyOtp:", error.message);
-                res.status(500).send({ error: error.message });
-            }
-        }
-        static async verifyOtp(req, res) {
-            try {
-                let email = req.user;
-                let { otp } = req.body;
+        //             await transporter.sendMail(mailOptions);
+        //             res.status(200).send({ message: "OTP sent successfully", otp });
+        //         });
+        //     } catch (error) {
+        //         console.error("Error in sendVerifyOtp:", error.message);
+        //         res.status(500).send({ error: error.message });
+        //     }
+        // }
+        // static async verifyOtp(req, res) {
+        //     try {
+        //         let email = req.user;
+        //         let { otp } = req.body;
         
-                conn.query('SELECT * FROM user WHERE email = ?', [email], async (err, result) => {
-                    if (err) {
-                        console.error("SQL Error:", err.message);
-                        res.status(400).send({ error: err.message });
-                        return;
-                    }
+        //         conn.query('SELECT * FROM user WHERE email = ?', [email], async (err, result) => {
+        //             if (err) {
+        //                 console.error("SQL Error:", err.message);
+        //                 res.status(400).send({ error: err.message });
+        //                 return;
+        //             }
         
-                    if (!result.length) {
-                        res.status(400).send({ error: "User does not exist" });
-                        return;
-                    }
+        //             if (!result.length) {
+        //                 res.status(400).send({ error: "User does not exist" });
+        //                 return;
+        //             }
         
-                    if (result[0].isVerified) {
-                        res.status(400).send({ error: "User is already verified" });
-                        return;
-                    }
+        //             if (result[0].isVerified) {
+        //                 res.status(400).send({ error: "User is already verified" });
+        //                 return;
+        //             }
                 
-                    let storedOtp = result[0].verifyOtp?.toString();
-                    let receivedOtp = otp.toString(); 
+        //             let storedOtp = result[0].verifyOtp?.toString();
+        //             let receivedOtp = otp.toString(); 
         
-                    if (storedOtp !== receivedOtp) {
-                        res.status(400).send({ error: "Invalid OTP" });
-                        return;
-                    }
+        //             if (storedOtp !== receivedOtp) {
+        //                 res.status(400).send({ error: "Invalid OTP" });
+        //                 return;
+        //             }
         
                   
-                    if (Date.now() > result[0].veriftyOtpExpiredAt) {
-                        res.status(400).send({ error: "OTP expired" });
-                        return;
-                    }
+        //             if (Date.now() > result[0].veriftyOtpExpiredAt) {
+        //                 res.status(400).send({ error: "OTP expired" });
+        //                 return;
+        //             }
         
                     
-                    conn.query('UPDATE user SET isVerified = ?, verifyOtp = NULL,verifyOtpExpiredAt = NULL WHERE email = ?', [true, email], (err, updateResult) => {
-                        if (err) {
-                            res.status(400).send({ error: err.message });
-                        } else {
-                            res.status(200).send({ message: "User verified successfully" });
-                        }
-                    });
-                });
-            } catch (error) {
-                console.error("Error in verifyOtp:", error.message);
-                res.status(500).send({ error: error.message });
-            }
-        }
+        //             conn.query('UPDATE user SET isVerified = ?, verifyOtp = NULL,verifyOtpExpiredAt = NULL WHERE email = ?', [true, email], (err, updateResult) => {
+        //                 if (err) {
+        //                     res.status(400).send({ error: err.message });
+        //                 } else {
+        //                     res.status(200).send({ message: "User verified successfully" });
+        //                 }
+        //             });
+        //         });
+        //     } catch (error) {
+        //         console.error("Error in verifyOtp:", error.message);
+        //         res.status(500).send({ error: error.message });
+        //     }
+        // }
         static async changePassword(req,res){
            try{
                 let {newPassword} = req.body;
