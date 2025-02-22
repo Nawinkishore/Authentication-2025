@@ -7,8 +7,8 @@
         static async register(req,res){
         try {
             const email_regex = /\S+@\S+\.\S+/;
-            let {name,email,password,role} = req.body;
-            if(!name || !email || !password || !role){
+            let {name,email,password,role,isVerified} = req.body;
+            if(!name || !email || !password || !role ){
                 res.status(400).send({error:"All fields are required"});
                 return;
             }
@@ -23,6 +23,10 @@
                 res.status(400).send({error:"Invalid email address"});
                 return;
             }
+            if(isVerified==false)
+            {
+                return res.status(400).send({error:"User is not verified"});
+            }
             conn.query('SELECT * FROM user WHERE email = ?',[email],async(err,result)=>{
                 if(err){
                     res.status(400).send({error:err.message});
@@ -34,7 +38,7 @@
                 }
                 let salt = await bcrypt.genSalt(10);
                 let hashedPassword = await bcrypt.hash(password,salt);
-                let newObj = {name,email,password:hashedPassword,role};
+                let newObj = {name,email,password:hashedPassword,role,isVerified};
                 let user = {
                     name,email,role
                 }
@@ -44,7 +48,7 @@
                         res.status(400).send({error:err.message});
                     }
                     else{
-                        let loginPage = `${process.env.BASE_URL}/api/auth/login`
+                        let loginPage = `${process.env.BASE_URL}/api/auth/me`
                         let mailOptions = {
                             from : process.env.SENDER_EMAIL,
                             to:email,
@@ -119,7 +123,9 @@
                         let user = result[0];
                         // To hide the Password
                         delete user.password;
-                        res.status(200).send({ user });
+                        // res.status(200).send({ user });
+                        res.send('Hello World!');
+                        //
                     }
                 });
             } catch (error) {
