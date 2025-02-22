@@ -123,6 +123,16 @@
                 res.status(500).send({ error: error.message });
             }
         }
+        static async forgotPassword(req, res) {
+            let { email } = req.body;
+            if (!email) {
+                res.status(400).send({ error: "Email is required" });
+                return;
+            }
+            conn.query('SELECT * FROM user WHERE email = ?', [email], async (err, result) => {
+                    // Forgot Password Logic Here
+            });
+        }
         static async sendVerifyOtp(req, res) {
             try {
                 let email  = req.user;
@@ -218,25 +228,28 @@
             }
         }
         static async changePassword(req,res){
-            try {
-                let {email,password,newPassword} = req.body;
-                if(!email || !password || !newPassword){
-                    res.status(400).send({error:"All fields are required"});
+           try{
+                let {newPassword} = req.body;
+                let email = req.user;
+                if(!newPassword){
+                    res.status(400).send({error:"Password is required"});
                     return;
                 }
+                let password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
+                if(!password_regex.test(newPassword)){
+                    res.status(400).send({error:"Password must contain at least one uppercase letter, one lowercase letter, one number and at least 6 characters"});
+                    return;
+                }
+                // check the newpassword is same as old password
                 conn.query('SELECT * FROM user WHERE email = ?',[email],async(err,result)=>{
                     if(err){
                         res.status(400).send({error:err.message});
                         return;
                     }
-                    if(!result.length){
-                        res.status(400).send({error:"User does not exist"});
-                        return;
-                    }
                     let user = result[0];
-                    let isMatch = await bcrypt.compare(password,user.password);
-                    if(!isMatch){
-                        res.status(400).send({error:"Invalid credentials"});
+                    let isMatch = await bcrypt.compare(newPassword,user.password);
+                    if(isMatch){
+                        res.status(400).send({error:"New password cannot be same as old password"});
                         return;
                     }
                     let salt = await bcrypt.genSalt(10);
@@ -250,9 +263,9 @@
                         }
                     });
                 });
-            } catch (error) {
-                res.status(500).send({error:error.message});
-            }
+           }catch(error){
+               res.status(500).send({error:error.message});
+           }
         }
         static async updateProfile(req,res){
             try {
