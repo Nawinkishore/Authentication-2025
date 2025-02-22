@@ -46,7 +46,7 @@
                         res.status(200).send({
                             message:"User registered successfully",
                             // user,
-                            // refreshToken:generateRefreshToken(user,res)
+                            refreshToken:generateRefreshToken(user,res)
                         });
                     }
                 });
@@ -84,15 +84,13 @@
                     res.status(200).send({
                         message:"User logged in successfully",
                         // user,
-                        // refreshToken:generateRefreshToken(user,res)
+                        refreshToken:generateRefreshToken(user,res)
                     });
                 });
             } catch (error) {
                 res.status(500).send({error:error.message});
             }
         }
-        
-
         static async logout(req, res) {
                     res.cookie("token", null,{
                         httpOnly: true,
@@ -100,8 +98,7 @@
                         sameSite: "strict",
                     });
                     res.status(200).send({ message: "User logged out successfully" });
-                }
-            
+        }
         static async getMe(req, res) {
             try {
                 let email = req.user;
