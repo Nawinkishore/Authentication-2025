@@ -54,6 +54,7 @@ BillSchema.pre("save", function(next){
     this.details.forEach((detail,index)=>{
         
         this.details[index].totalAmount = detail.quantity * detail.rate + (detail.tax/100);
+        next();
     })
 });
 const Bill = mongoose.model("Bill",BillSchema);
