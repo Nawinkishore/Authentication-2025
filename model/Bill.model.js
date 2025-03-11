@@ -4,7 +4,7 @@ const billDetailSchema = new mongoose.Schema({
         type : Number,
         required : true
     },
-    medicineName : {
+    treatmentName : {
         type : String,
         required : true
     },
@@ -21,10 +21,6 @@ const billDetailSchema = new mongoose.Schema({
         required : true
     },
     rate : {
-        type : Number,
-        required : true
-    },
-    tax : {
         type : Number,
         required : true
     },
@@ -53,7 +49,7 @@ const BillSchema = new mongoose.Schema({
 BillSchema.pre("save", function(next){
     this.details.forEach((detail,index)=>{
         
-        this.details[index].totalAmount = detail.quantity * detail.rate + (detail.tax/100);
+        this.details[index].totalAmount = detail.quantity * detail.rate;
         next();
     })
 });
