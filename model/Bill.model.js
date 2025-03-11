@@ -28,10 +28,7 @@ const billDetailSchema = new mongoose.Schema({
         type : Number,
         required : true
     },
-    totalAmount : {
-        type : Number,
-        required : true
-    }
+    totalAmount : Number
 });
 const BillSchema = new mongoose.Schema({
     fromAddress : {

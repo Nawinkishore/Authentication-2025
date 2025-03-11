@@ -36,3 +36,4 @@ app.listen(PORT, () => {
 });
 
 app.use("/api", router);
+app.use("/api/bill", router);
