@@ -13,3 +13,6 @@ router.get('/me', protectRoute('admin'), getMe);
 // router.post('/verifyotp', protectRoute('admin'), authController.verifyOtp);
 
 export default router;
+
+// Add service
+// Service price

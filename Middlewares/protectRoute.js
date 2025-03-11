@@ -10,16 +10,16 @@ const protectRoute = (...roles) => {
     
     try {
         const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-        console.log("Decoded JWT:", decoded);  
+         
         if(roles.length && !roles.includes('admin')){
             return res.status(403).json({ message: "Forbidden - You do not have permission to access this resource" });
         }
         req.user = decoded.user_id;
         next();
     } catch (error) {
-        console.error("JWT Verification Error:", error.message);
+       
         return res.status(401).json({ message: "Unauthorized - Invalid Token" });
-    }
+    }s
     }
 };
 export default protectRoute;
