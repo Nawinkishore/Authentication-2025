@@ -1,11 +1,15 @@
-import express  from "express";
-import { authController } from "../controllers/index.js";
+import express from "express";
+import { register, login, logout, getMe } from "../controllers/authController.js";
 import protectRoute from "../Middlewares/protectRoute.js";
+
 const router = express.Router();
-router.post('/login',authController.login);
-router.post('/register',authController.register);
-router.get('/logout',authController.logout);
-router.get('/me',protectRoute('admin'),authController.getMe);
-// router.post('/sendverifyotp',protectRoute('admin'),authController.sendVerifyOtp);
-// router.post('/verifyotp',protectRoute('admin'),authController.verifyOtp);
+
+router.post('/login', login);
+router.post('/register', register);
+router.get('/logout', logout);
+router.get('/me', protectRoute('admin'), getMe);
+
+// router.post('/sendverifyotp', protectRoute('admin'), authController.sendVerifyOtp);
+// router.post('/verifyotp', protectRoute('admin'), authController.verifyOtp);
+
 export default router;

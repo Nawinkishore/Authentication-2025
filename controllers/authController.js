@@ -1,9 +1,9 @@
 
-import conn from "../config/db.js";
+// import conn from "../config/db.js";
 import generateRefreshToken from "../Middlewares/refreshToken.js";
 import bcrypt from "bcrypt";
-import transporter from "../config/nodemailer.js";
-import User from "../models/User.model.js";
+// import transporter from "../config/nodemailer.js";
+import User from "../model/User.model.js";
 // export class authController {
 //     static async register(req, res) {
 //         try {
@@ -331,11 +331,10 @@ export const register = async (req, res) => {
         if(!password_regex.test(password)) {
             return res.status(400).send({ error: "Password must contain at least one uppercase letter, one lowercase letter, one number and at least 6 characters" });
         }
-        let emailSalt = await bcrypt.genSalt(10);
-        let hashedEmail = await bcrypt.hash(email, emailSalt);
+    
         let passwordSalt = await bcrypt.genSalt(10);
         let hashedPassword = await bcrypt.hash(password, passwordSalt);
-        const user = new User({ name, email:hashedEmail, password: hashedPassword });
+        const user = new User({ name, email, password: hashedPassword });
         await user.save();
         let token =  generateRefreshToken(user.id , res);
         return res.status(200).send({ 
