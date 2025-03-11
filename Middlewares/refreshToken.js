@@ -1,12 +1,7 @@
 import jwt from "jsonwebtoken";
-const generateRefreshToken = (user, res) => {
-    const userPayload = {
-        email: user.email,
-        name: user.name,
-        role: user.role
-    };
-
-    const token = jwt.sign(userPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+const generateRefreshToken = (user_id, res) => {
+   
+    const token = jwt.sign({user_id}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
 
      
 

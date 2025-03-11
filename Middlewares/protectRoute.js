@@ -14,7 +14,7 @@ const protectRoute = (...roles) => {
         if(roles.length && !roles.includes(decoded.role)){
             return res.status(403).json({ message: "Forbidden - You do not have permission to access this resource" });
         }
-        req.user = decoded.email;
+        req.user = decoded.user_id;
         next();
     } catch (error) {
         console.error("JWT Verification Error:", error.message);
