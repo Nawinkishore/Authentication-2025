@@ -350,3 +350,59 @@ export const register = async (req, res) => {
         });
     }
 };
+
+export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email) { return res.status(400).send({ error: "Email is required" }) }
+        if (!password) { return res.status(400).send({ error: "Password is required" }) }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).send({ error: "User does not exist" });
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).send({ error: "Invalid credentials" });
+        }
+        let token =  generateRefreshToken(user.id , res);
+        return res.status(200).send({ 
+            token,
+            success : true,
+            message: "User logged in successfully" });
+
+    } catch (error) {
+        return res.status(500).send({
+            error: error.message,
+            success: false
+        });
+    }
+}
+
+export const logout = async (req, res) => {
+    res.cookie("token", null, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+    });
+    res.status(200).send({ message: "User logged out successfully" });
+}
+
+export const getMe = async (req, res) => {
+    try {
+            let id = req.user;
+            const user = await User.findById(id);
+            if (!user) {
+                return res.status(400).send({ error: "User does not exist" });
+            }
+            return res.status(200).send({ 
+                user,
+                success : true
+            });
+    }
+    catch (error) {
+        return res.status(500).send({
+            error: error.message,
+            success: false
+        });
+    }
+}
