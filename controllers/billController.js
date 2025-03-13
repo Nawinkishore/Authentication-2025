@@ -39,26 +39,47 @@ export const getBillById = async (req, res) => {
 }
 
 export const updateBill = async (req, res) => {
-        const { id } = req.params;
-        try {
-            const { fromAddress, toAddress, invoiceNumber, invoiceDate, details } = req.body;
-            const bill = await Bill.findById(id);
-            if (!bill) {
-                return res.status(404).json({ message: "Bill not found" });
-            }
-    
-            bill.fromAddress = fromAddress;
-            bill.toAddress = toAddress;
-            bill.invoiceNumber = invoiceNumber;
-            bill.invoiceDate = invoiceDate;
-            bill.details = details;
-    
-            const updatedBill = await bill.save();
-            res.status(200).json(updatedBill);
-        } catch (error) {
-            res.status(500).json({ message: "Server Error" });
+    const { id } = req.params;
+    try {
+        const { fromAddress, toAddress, invoiceNumber, invoiceDate, details } = req.body;
+
+        const bill = await Bill.findById(id);
+        if (!bill) {
+            return res.status(404).json({ message: "Bill not found" });
         }
-}
+
+        
+        bill.fromAddress = fromAddress ?? bill.fromAddress;
+        bill.toAddress = toAddress ?? bill.toAddress;
+        bill.invoiceNumber = invoiceNumber ?? bill.invoiceNumber;
+        bill.invoiceDate = invoiceDate ?? bill.invoiceDate;
+
+        if (details && Array.isArray(details)) {
+            details.forEach((newDetail) => {
+                const existingDetail = bill.details.find(
+                    (detail) => detail.serialNumber === newDetail.serialNumber
+                );
+
+                if (existingDetail) {
+                    Object.keys(newDetail).forEach((key) => {
+                        if (newDetail[key] !== undefined && newDetail[key] !== null) {
+                            existingDetail[key] = newDetail[key];
+                        }
+                    });
+                } else {
+                    bill.details.push(newDetail);
+                }
+            });
+        }
+
+        const updatedBill = await bill.save();
+        res.status(200).json(updatedBill);
+    } catch (error) {
+        console.error("Error updating bill:", error);  // Detailed error log
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};
+
 
 export const deleteBillbyId = async (req, res) => {
     const { id } = req.params;
