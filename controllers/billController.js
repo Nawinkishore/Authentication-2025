@@ -90,7 +90,7 @@ export const deleteBillbyId = async (req, res) => {
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
-    await Bill.findByIdAndRemove(id);
+    await Bill.findByIdAndDelete(id);
     res.status(200).json({ message: "Bill deleted successfully" });
   } catch (error) {
     console.error("Error deleting bill:", error);
