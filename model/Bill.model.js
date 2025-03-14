@@ -10,22 +10,15 @@ const billDetailSchema = new mongoose.Schema({
 });
 
 const BillSchema = new mongoose.Schema({
-  // customer: {
-  //   customerId: { 
-  //     type: String, 
-  //     default: () => `CUST-${Date.now()}` 
-  //   },
-  //   customerName: { type: String, required: true },
-  // },
   fromAddress: { type: String, required: true },
   toAddress: { type: String, required: true },
   invoiceNumber: { 
     type: String, 
     default: () => `INV-${Date.now()}`
   },
-  invoiceDate: { type: Date, default: Date.now },
+  invoiceDate: { type: Date, default: Date.now()},
 
-  details: [billDetailSchema],
+  details: [billDetailSchema],  
 });
 
 
