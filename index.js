@@ -24,7 +24,10 @@ mongoose.connect(process.env.MONGO_URL)
     .catch((error) => {
         console.error("Error connecting to MongoDB:", error);
     });
-
+    mongoose.connection.on('error', (err) => {
+        console.error('❌ MongoDB Connection Error:', err);
+      });
+      
 
 
 app.use(bodyParser.json());

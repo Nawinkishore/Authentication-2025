@@ -26,3 +26,4 @@ const protectRoute = (...roles) => {
   };
 };
 export default protectRoute;
+
