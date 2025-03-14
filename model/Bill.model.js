@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+// import { v4 as uuidv4 } from "uuid";
+let customerCounter = 1000;
 const billDetailSchema = new mongoose.Schema({
   serialNumber: { type: Number, required: true },
   treatmentName: { type: String },
@@ -10,6 +12,15 @@ const billDetailSchema = new mongoose.Schema({
 });
 
 const BillSchema = new mongoose.Schema({
+  customerName : {
+    type: String,
+    required: true
+  },
+  customerId : {
+    type : String,
+    unique : true,
+    // default : uuidv4()
+  },
   fromAddress: { type: String, required: true },
   toAddress: { type: String, required: true },
   invoiceNumber: { 
@@ -22,7 +33,12 @@ const BillSchema = new mongoose.Schema({
 });
 
 
-BillSchema.pre("save", function (next) {
+BillSchema.pre("save", async function (next) {
+  if(!this.customerId)
+  {
+    let count = await mongoose.model('Bill').countDocuments();
+    this.customerId = `CUST-${customerCounter + count+1}`;
+  }
   if (this.details && Array.isArray(this.details)) {
     this.details.forEach((detail) => {
       detail.totalAmount = detail.quantity * detail.rate;
